@@ -28,9 +28,6 @@ Parameters:
       Description: public subnet cidr block
       Type: String
 
-    AMItoUse:
-      Description: AMI to use for our base image
-      Type: String
 
     EC2Type:
       Description: EC2 type
@@ -45,10 +42,6 @@ Parameters:
       Type: String
 
     
-    WorkflowID:
-      Description: Unique identifier.
-      Type: String
-      
 
 
 
@@ -137,7 +130,7 @@ Resources:
       Properties: 
         InstanceProfileName: EC2Instance
         Roles: 
-          - "Project2"  
+          - "react"  
   
 
     InstanceSecurityGroup:
@@ -289,54 +282,47 @@ Outputs:
     Description: VPC ID
     Value: !Ref MainVPC
     Export:
-      Name: !Sub "${EnvironmentName}-VPC"
+      Name: !Sub "VPC"
 
   PublicSubnet1:
     Description: Public Subnet ID
     Value: !Ref PublicSubnet1
     Export:
-      Name: !Sub "${EnvironmentName}-Public-Subnet1"
+      Name: !Sub "Public-Subnet1"
 
   PublicSubnet2:
     Description: Public Subnet ID
     Value: !Ref PublicSubnet2
     Export:
-      Name: !Sub "${EnvironmentName}-Public-Subnet2"
+      Name: !Sub "Public-Subnet2"
 
   
   PrivateSubnet1:
     Description: Private Subnet 1 ID
     Value: !Ref PrivateSubnet1
     Export:
-      Name: !Sub "${EnvironmentName}-Private-Subnet-1"
+      Name: !Sub "Private-Subnet-1"
 
   PrivateSubnet2:
     Description: Private Subnet 2 ID
     Value: !Ref PrivateSubnet2
     Export:
-      Name: !Sub "${EnvironmentName}-Private-Subnet-2"
+      Name: !Sub "Private-Subnet-2"
 
   EC2Security:
     Description: Instances security rules 
     Value: !Ref InstanceSecurityGroup
     Export:
-      Name: !Sub "${EnvironmentName}-InstanceSecurity"
-
-
-   
+      Name: !Sub "InstanceSecurity"
+ 
   
   EC2Profile:
     Description: Instances security rules 
     Value: !Ref  InstanceProfile
     Export:
-      Name: !Sub "${EnvironmentName}-InstanceProfile"
+      Name: !Sub "InstanceProfile"
 
-  WorkflowID:
-    Value: !Sub ${WorkflowID}
-    Description: Work flow number of old stack 
-    Export:
-      Name: WorkflowID
-
+ 
 
 
 

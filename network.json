@@ -1,7 +1,7 @@
 [
 	{
 		"ParameterKey": "EnvironmentName",
-		"ParameterValue": "UdacityProject"
+		"ParameterValue": "React"
 	},
 
     {
@@ -29,11 +29,6 @@
         "ParameterValue": "10.0.4.0/24"
     },
 
-
-    {
-        "ParameterKey": "AMItoUse",
-        "ParameterValue": "ami-0557a15b87f6559cf"
-    },
 
     {
         "ParameterKey": "EC2Type",
