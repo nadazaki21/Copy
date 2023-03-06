@@ -53,36 +53,36 @@ Resources:
 
   
 
-  WebServerASGLaunchConfiguration:
-    Type: AWS::AutoScaling::LaunchConfiguration
-    Properties:
-      ImageId: ami-0574da719dca65348
-      InstanceType: t2.medium
-      InstanceMonitoring: true
-      SecurityGroups:
-        - Fn::ImportValue:  "InstanceSecurity"
-      IamInstanceProfile: 
-        Fn::ImportValue:  "InstanceProfile"
-      BlockDeviceMappings:
-        - DeviceName: /dev/sda1
-          Ebs:
-            VolumeSize: 10
-            DeleteOnTermination: true
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          apt update -y
-          apt install nginx  awscli -y
+  # WebServerASGLaunchConfiguration:
+  #   Type: AWS::AutoScaling::LaunchConfiguration
+  #   Properties:
+  #     ImageId: ami-0574da719dca65348
+  #     InstanceType: t2.medium
+  #     InstanceMonitoring: true
+  #     SecurityGroups:
+  #       - Fn::ImportValue:  "InstanceSecurity"
+  #     IamInstanceProfile: 
+  #       Fn::ImportValue:  "InstanceProfile"
+  #     BlockDeviceMappings:
+  #       - DeviceName: /dev/sda1
+  #         Ebs:
+  #           VolumeSize: 10
+  #           DeleteOnTermination: true
+  #     UserData:
+  #       Fn::Base64: !Sub |
+  #         #!/bin/bash
+  #         apt update -y
+  #         apt install nginx  awscli -y
 
           
-          rm -rf /var/www/html/index.html
+  #         rm -rf /var/www/html/index.html
 
           
 
 
-          cd /var/www/html
+  #         cd /var/www/html
 
-          echo "              It works! Udagram, Udacity "  >> index.html 
+  #         echo "              It works! Udagram, Udacity "  >> index.html 
 
      
   
@@ -109,33 +109,33 @@ Resources:
           Value: !Sub ${WorkflowID}
     
 
-  AutoScalingGroup:
-    Type: AWS::AutoScaling::AutoScalingGroup
-    UpdatePolicy:
-      AutoScalingReplacingUpdate:
-        WillReplace: true
-    Properties:
-      LaunchConfigurationName: !Ref WebServerASGLaunchConfiguration
-      MaxSize: 4
-      MinSize: 2
-      DesiredCapacity: 2
+  # AutoScalingGroup:
+  #   Type: AWS::AutoScaling::AutoScalingGroup
+  #   UpdatePolicy:
+  #     AutoScalingReplacingUpdate:
+  #       WillReplace: true
+  #   Properties:
+  #     LaunchConfigurationName: !Ref WebServerASGLaunchConfiguration
+  #     MaxSize: 4
+  #     MinSize: 2
+  #     DesiredCapacity: 2
 
-      VPCZoneIdentifier:
-        - Fn::ImportValue:  "Private-Subnet-1"
-        - Fn::ImportValue:  "Private-Subnet-2"
+  #     VPCZoneIdentifier:
+  #       - Fn::ImportValue:  "Private-Subnet-1"
+  #       - Fn::ImportValue:  "Private-Subnet-2"
 
-      TargetGroupARNs:
-        - !Ref TargetGroup
+  #     TargetGroupARNs:
+  #       - !Ref TargetGroup
 
-  AutoScalingPolicy:  ## The metric type to be tracked, which for simplicity will be tracking the Average CPU Utilization of the ASG instances
-    Type: AWS::AutoScaling::ScalingPolicy
-    Properties:
-      AutoScalingGroupName: !Ref AutoScalingGroup
-      PolicyType: TargetTrackingScaling
-      TargetTrackingConfiguration:
-        PredefinedMetricSpecification:
-          PredefinedMetricType: ASGAverageCPUUtilization
-        TargetValue: 30
+  # AutoScalingPolicy:  ## The metric type to be tracked, which for simplicity will be tracking the Average CPU Utilization of the ASG instances
+  #   Type: AWS::AutoScaling::ScalingPolicy
+  #   Properties:
+  #     AutoScalingGroupName: !Ref AutoScalingGroup
+  #     PolicyType: TargetTrackingScaling
+  #     TargetTrackingConfiguration:
+  #       PredefinedMetricSpecification:
+  #         PredefinedMetricType: ASGAverageCPUUtilization
+  #       TargetValue: 30
 
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -222,3 +222,10 @@ Outputs:
     Description: Work flow number of old stack 
     Export:
       Name: !Sub WorkflowID-${WorkflowID}
+
+  TargetGroup:
+    Description: LB Target group id 
+    Value: !Ref  TargetGroup
+    Export:
+      Name: TargetGroup
+

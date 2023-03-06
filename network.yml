@@ -320,7 +320,7 @@ Outputs:
     Description: Instances security rules 
     Value: !Ref  InstanceProfile
     Export:
-      Name: !Sub "InstanceProfile"
+      Name:  "InstanceProfile"
 
  
 
