@@ -40,16 +40,16 @@ Resources:
 
           
           cd ~
-          sudo aws s3 sync  s3://react-gp23--${WorkflowID}/app   .
+          sudo aws s3 sync  s3://react-gp23-${WorkflowID}/app   .
 
 
-          cd ~/app
+          cd ~
           npm run build
 
           sudo mkdir /var/www/react-app
           sudo chown -R $USER:$USER  /var/www/react-app
 
-          cd ~/app
+          cd ~
           sudo cp -r build/*  /var/www/react-app
 
           cd /etc/nginx/sites-available
