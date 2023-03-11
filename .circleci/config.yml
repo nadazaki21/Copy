@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - checkout  
-      - run: sudo apt install tar gzip
+      - run: yum install tar gzip
       - run:
           name: Create Network Stack
           command: |
