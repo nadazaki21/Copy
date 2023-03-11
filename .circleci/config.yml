@@ -285,7 +285,7 @@ workflows:
       - store-app:
           requires: [create-bucket]
       - deploy-infrastructure:
-        requires: [store-app]
+          requires: [store-app]
       # - fetch-app:
       #     requires: [deploy-infrastructure , store-app ]
       # - build-app:
