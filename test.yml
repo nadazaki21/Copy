@@ -1,0 +1,98 @@
+Description: 
+   Netrwork base for Hosting WebApp.
+
+Parameters:
+
+    
+
+    VPCCIDR:
+      Description: Please enter the IP range (CIDR notation) for this
+      Type: String
+      Default: 10.0.0.0/16
+    
+     
+
+
+
+Resources:
+
+
+    VPC:
+      Type: AWS::EC2::VPC
+      Properties: 
+        CidrBlock: !Ref VPCCIDR
+        EnableDnsSupport: true
+        EnableDnsHostnames: true
+        
+    
+    PublicSubnet:
+      Type: AWS::EC2::Subnet
+      Properties: 
+        AvailabilityZone: us-east-1b
+        CidrBlock: 10.0.5.0/24
+        MapPublicIpOnLaunch: true
+        VpcId: !Ref VPC  
+        
+   
+            
+
+    InternetGW:
+      Type: AWS::EC2::InternetGateway
+
+    AttachInternetGateway:
+      Type: AWS::EC2::VPCGatewayAttachment
+      Properties:
+        VpcId: !Ref VPC
+        InternetGatewayId: !Ref InternetGW  
+
+
+    InstanceSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        VpcId: !Ref "VPC"
+          
+        GroupDescription: Allow SSH from anywhere
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: 0.0.0.0/0  
+        SecurityGroupEgress:
+          - IpProtocol: tcp
+            FromPort: 0
+            ToPort: 65535
+            CidrIp: 0.0.0.0/0    
+
+    Instance:
+      Type: AWS::EC2::Instance
+      Properties:
+        InstanceType: t2.micro
+        ImageId: ami-0574da719dca65348
+        SecurityGroupIds: 
+          - Ref: InstanceSecurityGroup 
+        KeyName: nada
+        SubnetId: !Ref PublicSubnet
+
+    
+    PublicRouteTable:
+      Type: AWS::EC2::RouteTable
+      Properties: 
+          VpcId: !Ref VPC
+        
+    DefaultPublicRoute: 
+        Type: AWS::EC2::Route
+        DependsOn: AttachInternetGateway
+        Properties: 
+            RouteTableId: !Ref PublicRouteTable
+            DestinationCidrBlock: 0.0.0.0/0
+            GatewayId: !Ref InternetGW
+
+    PublicSubnet1RouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            RouteTableId: !Ref PublicRouteTable
+            SubnetId: !Ref PublicSubnet
+          
+      
+
+
