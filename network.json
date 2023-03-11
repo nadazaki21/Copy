@@ -38,12 +38,12 @@
     
     {
         "ParameterKey": "AZ1",
-        "ParameterValue": "us-east-1a"
+        "ParameterValue": "us-east-1b"
     },
 
     {
         "ParameterKey": "AZ2",
-        "ParameterValue": "us-east-1b"
+        "ParameterValue": "us-east-1a"
     }
     
      

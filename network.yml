@@ -54,9 +54,13 @@ Resources:
         CidrBlock: !Ref VPCCIDR
         EnableDnsSupport: true
         EnableDnsHostnames: true
-        Tags: 
-          - Key: Name
-            Value: "Main VPC"
+        
+    # VPC:
+    #   Type: AWS::EC2::VPC
+    #   Properties: 
+    #     CidrBlock: !Ref VPCCIDR
+    #     EnableDnsSupport: true
+    #     EnableDnsHostnames: true
 
     PrivateSubnet1:
       Type: AWS::EC2::Subnet
@@ -87,10 +91,7 @@ Resources:
         CidrBlock: !Ref PubSubnetCIDR1
         MapPublicIpOnLaunch: true
         VpcId: !Ref MainVPC  
-        Tags: 
-          - Key: Name
-            Value: !Sub ${EnvironmentName} Public Subnet1
-
+        
     PublicSubnet2:
       Type: AWS::EC2::Subnet
       Properties: 
@@ -98,9 +99,16 @@ Resources:
         CidrBlock: !Ref PubSubnetCIDR2
         MapPublicIpOnLaunch: true
         VpcId: !Ref MainVPC  
-        Tags: 
-          - Key: Name
-            Value: !Sub ${EnvironmentName} Public Subnet2 
+        
+
+    # PublicSubnet:
+    #   Type: AWS::EC2::Subnet
+    #   Properties: 
+    #     AvailabilityZone: us-east-1b
+    #     CidrBlock: 10.0.5.0/24
+    #     MapPublicIpOnLaunch: true
+    #     VpcId: !Ref VPC  
+        
             
 
     InternetGW:
@@ -111,6 +119,15 @@ Resources:
       Properties:
         VpcId: !Ref MainVPC
         InternetGatewayId: !Ref InternetGW  
+
+    # InternetGW:
+    #   Type: AWS::EC2::InternetGateway
+
+    # AttachInternetGateway:
+    #   Type: AWS::EC2::VPCGatewayAttachment
+    #   Properties:
+    #     VpcId: !Ref VPC
+    #     InternetGatewayId: !Ref InternetGW  
 
     NatGatewayEIP:
           Type: AWS::EC2::EIP
@@ -152,15 +169,7 @@ Resources:
             ToPort: 65535
             CidrIp: 0.0.0.0/0    
 
-
-    # PublicRouteTable:
-    #   Type: AWS::EC2::RouteTable
-    #   Properties: 
-    #     Tags: 
-    #       - Key: Name
-    #         Value: "Pulic Route Table"
-    #     VpcId: !Ref MainVPC  # The route table cannot use the Internet Gateway until it has successfully attached to the VPC.
-
+    #private route tables 
     PrivateRouteTable1:
       Type: AWS::EC2::RouteTable
       Properties: 
@@ -177,18 +186,6 @@ Resources:
             Value: "Private Route Table"
         VpcId: !Ref MainVPC
 
-    # AssociatePUBLICtoRT:
-    #   Type: AWS::EC2::SubnetRouteTableAssociation
-    #   Properties: 
-    #     RouteTableId: !Ref PublicRouteTable
-    #     SubnetId: !Ref PublicSubnet1
-    
-    # AssociatePUBLICtoRT:
-    #   Type: AWS::EC2::SubnetRouteTableAssociation
-    #   Properties: 
-    #     RouteTableId: !Ref PublicRouteTable
-    #     SubnetId: !Ref PublicSubnet2
-
     AssociatePRIVRT1toRT:
       Type: AWS::EC2::SubnetRouteTableAssociation
       Properties: 
@@ -200,16 +197,6 @@ Resources:
       Properties: 
         RouteTableId: !Ref PrivateRouteTable2
         SubnetId: !Ref PrivateSubnet2
-    
-    # PublicInternetOutboundRoute:
-    #   Type: AWS::EC2::Route
-    #   DependsOn: AttachInternetGateway #If you create a route that references an Internet Gateway in the same template where you create the Internet Gateway, you must declare a dependency on the Internet Gateway attachment.
-    #   Properties:
-    #     RouteTableId:
-    #       Ref: PublicRouteTable
-    #     DestinationCidrBlock: 0.0.0.0/0
-    #     GatewayId:
-    #       Ref: InternetGW
 
     PrivateInternetOutboundRoute1:
       Type: AWS::EC2::Route
@@ -228,6 +215,64 @@ Resources:
         DestinationCidrBlock: 0.0.0.0/0
         NatGatewayId:
           Ref: NatGateway
+
+
+    PublicRouteTable:
+      Type: AWS::EC2::RouteTable
+      Properties: 
+        VpcId: !Ref MainVPC  # The route table cannot use the Internet Gateway until it has successfully attached to the VPC.
+
+
+    # PublicRouteTable:
+    #   Type: AWS::EC2::RouteTable
+    #   Properties: 
+    #       VpcId: !Ref VPC
+
+   
+
+    AssociatePUBLIC1toRT:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties: 
+        RouteTableId: !Ref PublicRouteTable
+        SubnetId: !Ref PublicSubnet1
+    
+    AssociatePUBLIC2toRT:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties: 
+        RouteTableId: !Ref PublicRouteTable
+        SubnetId: !Ref PublicSubnet2
+    
+    # PublicSubnet1RouteTableAssociation:
+    #     Type: AWS::EC2::SubnetRouteTableAssociation
+    #     Properties:
+    #         RouteTableId: !Ref PublicRouteTable
+    #         SubnetId: !Ref PublicSubnet
+    
+    
+    PublicInternetOutboundRoute:
+      Type: AWS::EC2::Route
+      DependsOn: AttachInternetGateway #If you create a route that references an Internet Gateway in the same template where you create the Internet Gateway, you must declare a dependency on the Internet Gateway attachment.
+      Properties:
+        RouteTableId:
+          Ref: PublicRouteTable
+        DestinationCidrBlock: 0.0.0.0/0
+        GatewayId:
+          Ref: InternetGW
+
+    
+
+    
+        
+    # DefaultPublicRoute: 
+    #     Type: AWS::EC2::Route
+    #     DependsOn: AttachInternetGateway
+    #     Properties: 
+    #         RouteTableId: !Ref PublicRouteTable
+    #         DestinationCidrBlock: 0.0.0.0/0
+    #         GatewayId: !Ref InternetGW
+
+    
+          
 
 
 Outputs:
