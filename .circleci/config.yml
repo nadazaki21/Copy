@@ -40,7 +40,7 @@ jobs:
           name: Create Network Stack
           command: |
              #aws cloudformation create-stack --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}" --template-body file://network.yml   --parameters file://network.json   --tags Key=project,Value=react 
-             aws cloudformation deploy --template-file network.yml   --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}"    --parameter-overrides  file://network.json --tags project=react 
+             aws cloudformation deploy --template-file network.yml   --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}"    --parameter-overrides  file://network.json --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM"   --tags project=react 
       
       - run:
           name: Create LB Stack
