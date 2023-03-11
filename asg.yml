@@ -40,7 +40,7 @@ Resources:
 
           
           cd ~
-          aws s3 cp s3://react-gp23--${WorkflowID}/app
+          sudo aws s3 cp s3://react-gp23--${WorkflowID}/app
           
 
           cd ~/app
@@ -101,8 +101,8 @@ Resources:
 Outputs:
 
 
-  WorkflowID:
-    Value: !Sub ${WorkflowID}
-    Description: Work flow number of old stack 
-    Export:
-      Name:  WorkflowID
+  # WorkflowID:
+  #   Value: !Sub ${WorkflowID}
+  #   Description: Work flow number of old stack 
+  #   Export:
+  #     Name:  WorkflowID
