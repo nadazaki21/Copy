@@ -55,6 +55,11 @@ Resources:
           rm -f default  
           sudo cp  ~/app/default  /etc/nginx/sites-available
 
+          sudo systemctl restart nginx
+
+          sudo npm install pm2@latest -g
+          pm2 start --name "react-app" 
+
 
 
 
@@ -70,7 +75,7 @@ Resources:
       MaxSize: 4
       MinSize: 2
       DesiredCapacity: 2
-      
+
 
       VPCZoneIdentifier:
         - Fn::ImportValue:  "Private-Subnet-1"
