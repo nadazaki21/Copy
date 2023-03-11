@@ -39,6 +39,27 @@ jobs:
     steps:
       - checkout  
       - run: yum install tar gzip -y
+
+      - run:
+          name: Get old stack workflow id and Save it
+          command: |
+            export OldWorkflowID=$(aws cloudformation \
+                    list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+                    --no-paginate --output text)
+
+                  
+            echo OldWorkflowID: "${OldWorkflowID}"
+            echo Current_CIRCLE_WORKFLOW_ID: "${CIRCLE_WORKFLOW_ID:0:5}"
+            echo $OldWorkflowID > ~/OldWorkflowID.txt
+
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - OldWorkflowID.txt
+      
+      - run: cat ~/OldWorkflowID.txt
+
+      
       - run:
           name: Create Network Stack
           command: |
@@ -60,25 +81,7 @@ jobs:
             #aws cloudformation create-stack --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}" --template-body file://service.yml   --parameters file://service.json  --tags Key=project,Value=react 
             aws cloudformation deploy --template-file asg.yml   --stack-name "asg-${CIRCLE_WORKFLOW_ID:0:5}"  --parameter-overrides  WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}"  --tags project=react 
       
-      - run:
-          name: Get old stack workflow id and Save it
-          command: |
-            export OldWorkflowID=$(aws cloudformation \
-                    list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-                    --no-paginate --output text)
-
-                  
-            echo OldWorkflowID: "${OldWorkflowID}"
-            echo Current_CIRCLE_WORKFLOW_ID: "${CIRCLE_WORKFLOW_ID:0:5}"
-            echo $OldWorkflowID > ~/OldWorkflowID.txt
-
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - OldWorkflowID.txt
       
-      - run: cat ~/OldWorkflowID.txt
-
       - destroy-bucket
       - destroy-enviroment
 
@@ -272,7 +275,9 @@ jobs:
               then
                 echo "------------------ Deleting old Envirments ------------------"
                 aws cloudformation delete-stack --stack-name "asg-${OldWorkflowID}"
-                aws s3 rm s3://react-gp23-${OldWorkflowID} --recursive
+                aws cloudformation delete-stack --stack-name "s3bucket-${OldWorkflowID}"
+                
+            
                 
               else
                 echo "------------------ Nothing to Delete/Can't Delete ------------------"  
