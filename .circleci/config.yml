@@ -16,7 +16,8 @@ commands:
           when: on_fail
           command: |
             aws cloudformation delete-stack --stack-name network-${CIRCLE_WORKFLOW_ID:0:5}  
-            aws cloudformation delete-stack --stack-name service-${CIRCLE_WORKFLOW_ID:0:5}  
+            aws cloudformation delete-stack --stack-name service-${CIRCLE_WORKFLOW_ID:0:5}
+            aws cloudformation delete-stack --stack-name asg-${CIRCLE_WORKFLOW_ID:0:5} 
   
   destroy-bucket:
     steps:
@@ -40,20 +41,20 @@ jobs:
           name: Create Network Stack
           command: |
              #aws cloudformation create-stack --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}" --template-body file://network.yml   --parameters file://network.json   --tags Key=project,Value=react 
-             aws cloudformation deploy --template-file network.yml   --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}"    --parameter-overrides  file://network.json --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM"   --tags project=react 
+             #aws cloudformation deploy --template-file network.yml   --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}"    --parameter-overrides  file://network.json --capabilities "CAPABILITY_IAM" "CAPABILITY_NAMED_IAM"   --tags project=react 
       
       - run:
           name: Create LB Stack
           command: |
-            ./deploy-service.sh
+    
 
             #aws cloudformation create-stack --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}" --template-body file://service.yml   --parameters file://service.json  --tags Key=project,Value=react 
-            aws cloudformation deploy --template-file service.yml   --stack-name "service-${CIRCLE_WORKFLOW_ID:0:5}"    --tags project=react 
+            #aws cloudformation deploy --template-file service.yml   --stack-name "service-${CIRCLE_WORKFLOW_ID:0:5}"    --tags project=react 
       
       - run:
           name: Create ASG Stack
           command: |
-            ./deploy-service.sh
+            
 
             #aws cloudformation create-stack --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}" --template-body file://service.yml   --parameters file://service.json  --tags Key=project,Value=react 
             aws cloudformation deploy --template-file asg.yml   --stack-name "asg-${CIRCLE_WORKFLOW_ID:0:5}"  --parameter-overrides  WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}"  --tags project=react 
