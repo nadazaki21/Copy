@@ -30,16 +30,33 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
+
           apt update -y
           apt install nginx  awscli -y
+          curl -sL https://deb.nodesource.com/setup_15.x | sudo -E bash -
+          sudo apt install nodejs -y
+          sudo apt install npm  -y 
 
           
-          rm -rf /var/www/html/index.html
+          cd ~
+          aws s3 cp s3://react-gp23--${WorkflowID}
+          
+
+          cd ~/app
+          npm run build
+
+          sudo mkdir /var/www/react-app
+          sudo chown -R $USER:$USER
+
+          cd ~/app
+          cp -r build/*  /var/www/react-app
+
+          cd /etc/nginx/sites-available
+          rm -f default  
+          sudo cp  ~/app/default  /etc/nginx/sites-available
 
 
-          cd /var/www/html
 
-          echo "              It works! Udagram, Udacity "  >> index.html 
 
      
 
@@ -53,6 +70,7 @@ Resources:
       MaxSize: 4
       MinSize: 2
       DesiredCapacity: 2
+      
 
       VPCZoneIdentifier:
         - Fn::ImportValue:  "Private-Subnet-1"
@@ -73,11 +91,7 @@ Resources:
           PredefinedMetricType: ASGAverageCPUUtilization
         TargetValue: 30
 
-  
-
-  
-            
-     
+       
 Outputs:
 
 
@@ -85,4 +99,4 @@ Outputs:
     Value: !Sub ${WorkflowID}
     Description: Work flow number of old stack 
     Export:
-      Name: !Sub WorkflowID-${WorkflowID}
+      Name:  WorkflowID

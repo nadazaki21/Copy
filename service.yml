@@ -4,18 +4,18 @@ Description:
 Parameters:
 
 
-  WorkflowID:
-      Description: An environment name that will be prefixed to resource names
-      Type: String
+  # WorkflowID:
+  #     Description: An environment name that will be prefixed to resource names
+  #     Type: String
   
 
-  Wf:
-    Description: An environment name that will be prefixed to resource names
-    Type: String
+  # Wf:
+  #   Description: An environment name that will be prefixed to resource names
+  #   Type: String
 
-  Wf2:
-    Description: An environment name that will be prefixed to resource names
-    Type: String
+  # Wf2:
+  #   Description: An environment name that will be prefixed to resource names
+  #   Type: String
 
 
   # AMItoUse:
@@ -217,11 +217,11 @@ Outputs:
     Export:
       Name:  !Sub "${WorkflowID}-ELB-DNS-Name"
 
-  WorkflowID:
-    Value: !Sub ${WorkflowID}
-    Description: Work flow number of old stack 
-    Export:
-      Name: !Sub WorkflowID-${WorkflowID}
+  # WorkflowID:
+  #   Value: !Sub ${WorkflowID}
+  #   Description: Work flow number of old stack 
+  #   Export:
+  #     Name: !Sub WorkflowID-${WorkflowID}
 
   TargetGroup:
     Description: LB Target group id 

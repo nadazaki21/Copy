@@ -1,5 +1,12 @@
 version: 2.1
 
+
+#instead of acessing the ec2 instaces you'll need to access the whole auto scaling group using ansible
+# the cleanup is almost done 
+# the smoke test 
+# and that's it 
+
+
 commands:
 
   destroy-enviroment:
@@ -32,67 +39,76 @@ jobs:
       - run:
           name: Create Network Stack
           command: |
-             #aws cloudformation create-stack --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}" --template-body file://network.yml   --parameters file://network.json   --tags Key=project,Value=react 
+             aws cloudformation create-stack --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}" --template-body file://network.yml   --parameters file://network.json   --tags Key=project,Value=react 
              #aws cloudformation deploy --template-file network.yml   --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}"   --parameter-overrides  WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}" --parameter-overrides  file://network.json --tags project=react 
       
       - run:
-          name: Create Services Stack
+          name: Create LB Stack
           command: |
             ./deploy-service.sh
 
             #aws cloudformation create-stack --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}" --template-body file://service.yml   --parameters file://service.json  --tags Key=project,Value=react 
-            #aws cloudformation deploy --template-file service.yml   --stack-name "service-${CIRCLE_WORKFLOW_ID:0:5}"  --parameter-overrides  WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}"   --tags project=react 
+            aws cloudformation deploy --template-file service.yml   --stack-name "service-${CIRCLE_WORKFLOW_ID:0:5}"    --tags project=react 
       
+      - run:
+          name: Create ASG Stack
+          command: |
+            ./deploy-service.sh
+
+            #aws cloudformation create-stack --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}" --template-body file://service.yml   --parameters file://service.json  --tags Key=project,Value=react 
+            aws cloudformation deploy --template-file asg.yml   --stack-name "asg-${CIRCLE_WORKFLOW_ID:0:5}"  --parameter-overrides  WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}"  --tags project=react 
+      
+
       - destroy-bucket
       - destroy-enviroment
 
 
-  confiugre-instaces:
-    docker:
-      - image: python:3.9-alpine3.16  #has no SSH 
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: 
-            - "57:3d:1b:ca:bb:bf:17:d8:38:c0:c8:30:fe:b7:14:40"
+  # confiugre-instaces:
+  #   docker:
+  #     - image: python:3.9-alpine3.16  #has no SSH 
+  #   steps:
+  #     - checkout
+  #     - add_ssh_keys:
+  #         fingerprints: 
+  #           - "57:3d:1b:ca:bb:bf:17:d8:38:c0:c8:30:fe:b7:14:40"
 
-      - run:
-          name: Add hosting Instace ip to ansible inventory
-          command: |
+  #     - run:
+  #         name: Add hosting Instace ip to ansible inventory
+  #         command: |
            
-           echo "[web]" > ~/project/inv/inventory.txt
-           aws ec2 describe-instances    --query 'Reservations[*].Instances[*].PublicIpAddress'   --filters "Name=tag:Name,Values=ReactApp"    --output text >> ~/inventory.txt
+  #          echo "[web]" > ~/project/inv/inventory.txt
+  #          aws ec2 describe-instances    --query 'Reservations[*].Instances[*].PublicIpAddress'   --filters "Name=tag:Name,Values=ReactApp"    --output text >> ~/inventory.txt
 
-      - run: cat ~/inventory.txt
+  #     - run: cat ~/inventory.txt
 
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --no-cache tar gzip
-            pip install ansible awscli
-            apk add openssh-client
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           apk add --no-cache tar gzip
+  #           pip install ansible awscli
+  #           apk add openssh-client
             
-      - run:
-          name: Configure server and install the node_exporter for Prometheus
-          command: |
-            ansible-playbook -i ~/inventory.txt  ~/configure-server.yml
+  #     - run:
+  #         name: Configure server and install the node_exporter for Prometheus
+  #         command: |
+  #           ansible-playbook -i ~/inventory.txt  ~/configure-server.yml
       
-      - run: 
-          name: ensure that nginx is runnign successsfully with its default web-page.
-          command: | 
-           URL = aws ec2 describe-instances - --query 'Reservations[].Instances[].PublicDnsName'   --filters "Name=tag:Name,Values=ReactApp" 
-           echo ${URL}
-           if curl -s ${URL} | grep "Welcome"
-            then
-              echo "nginx is working successfully"
-                # Change this to 0 after the job fails
-              exit 0
-            else
-              exit 1
-            fi
+  #     - run: 
+  #         name: ensure that nginx is runnign successsfully with its default web-page.
+  #         command: | 
+  #          URL = aws ec2 describe-instances - --query 'Reservations[].Instances[].PublicDnsName'   --filters "Name=tag:Name,Values=ReactApp" 
+  #          echo ${URL}
+  #          if curl -s ${URL} | grep "Welcome"
+  #           then
+  #             echo "nginx is working successfully"
+  #               # Change this to 0 after the job fails
+  #             exit 0
+  #           else
+  #             exit 1
+  #           fi
 
-      - destroy-enviroment
-      - destroy-bucket
+  #     - destroy-enviroment
+  #     - destroy-bucket
 
   create-bucket:
     docker:
@@ -122,63 +138,63 @@ jobs:
       - destroy-bucket
       - destroy-enviroment
 
-  fetch-app: #from S3 bucket
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: 
-            - "57:3d:1b:ca:bb:bf:17:d8:38:c0:c8:30:fe:b7:14:40"
-      - run:
-          name: Install awscli
-          command: |
-            sudo apt install -y tar gzip
-            echo "installing AWS CLI "
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
+  # fetch-app: #from S3 bucket
+  #   docker:
+  #     - image: circleci/node:13.8.0
+  #   steps:
+  #     - checkout
+  #     - add_ssh_keys:
+  #         fingerprints: 
+  #           - "57:3d:1b:ca:bb:bf:17:d8:38:c0:c8:30:fe:b7:14:40"
+  #     - run:
+  #         name: Install awscli
+  #         command: |
+  #           sudo apt install -y tar gzip
+  #           echo "installing AWS CLI "
+  #           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  #           unzip awscliv2.zip
+  #           sudo ./aws/install
 
-      - run:
-          name: Download the app file from S3Bucket
-          command: |
-              cd ~
-              aws s3 cp s3://react-gp23--${CIRCLE_WORKFLOW_ID:0:5}
+  #     - run:
+  #         name: Download the app file from S3Bucket
+  #         command: |
+  #             cd ~
+  #             aws s3 cp s3://react-gp23--${CIRCLE_WORKFLOW_ID:0:5}
       
 
-      - destroy-bucket
-      - destroy-enviroment
+  #     - destroy-bucket
+  #     - destroy-enviroment
 
-  build-app: #Produce node_modules and the 'Build' folder.
-    docker:
-    - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: 
-            - "57:3d:1b:ca:bb:bf:17:d8:38:c0:c8:30:fe:b7:14:40"
+  # build-app: #Produce node_modules and the 'Build' folder.
+  #   docker:
+  #   - image: circleci/node:13.8.0
+  #   steps:
+  #     - checkout
+  #     - add_ssh_keys:
+  #         fingerprints: 
+  #           - "57:3d:1b:ca:bb:bf:17:d8:38:c0:c8:30:fe:b7:14:40"
 
-      - run:
-          name: make sure that app files are available
-          command: |
-              ls -la ~
+  #     - run:
+  #         name: make sure that app files are available
+  #         command: |
+  #             ls -la ~
       
-      - run: 
-          name: Produce node_modules folder
-          command: |
-            cd ~ 
-            npm install 
-            ls -la 
+  #     - run: 
+  #         name: Produce node_modules folder
+  #         command: |
+  #           cd ~ 
+  #           npm install 
+  #           ls -la 
 
-      - run: 
-          name: Produce build folder
-          command: |
-            cd ~ 
-            npm run build
-            ls -la 
+  #     - run: 
+  #         name: Produce build folder
+  #         command: |
+  #           cd ~ 
+  #           npm run build
+  #           ls -la 
       
-      - destroy-bucket
-      - destroy-enviroment
+  #     - destroy-bucket
+  #     - destroy-enviroment
   
 
 
@@ -261,15 +277,15 @@ workflows:
   default:
     jobs:
       - deploy-infrastructure
-      - confiugre-instaces:
-          requires: [deploy-infrastructure]
+      # - confiugre-instaces:
+      #     requires: [deploy-infrastructure]
       - create-bucket
       - store-app:
           requires: [create-bucket]
-      - fetch-app:
-          requires: [deploy-infrastructure , store-app ]
-      - build-app:
-          requires: [fetch-app ]
+      # - fetch-app:
+      #     requires: [deploy-infrastructure , store-app ]
+      # - build-app:
+      #     requires: [fetch-app ]
       
 
 
