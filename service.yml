@@ -182,10 +182,15 @@ Resources:
         Fn::ImportValue: "VPC"
       GroupDescription: Allow SSH from anywhere
       SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: 0.0.0.0/0  # you can limit shh connection to your own public ip only 
+      SecurityGroupEgress:
         - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 0.0.0.0/0  #more secure to be limited to my own ip 
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0    
 
   Jumpbox:
     Type: AWS::EC2::Instance
