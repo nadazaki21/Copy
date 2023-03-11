@@ -35,8 +35,10 @@ jobs:
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli 
+
     steps:
-      - checkout     
+      - checkout  
+      - run: sudo apt install tar gzip
       - run:
           name: Create Network Stack
           command: |
