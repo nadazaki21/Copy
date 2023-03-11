@@ -277,14 +277,15 @@ workflows:
   default:
     jobs:
       - create-bucket
-      - deploy-infrastructure:
-          requires: [create-bucket]
+     
 
       # - confiugre-instaces:
       #     requires: [deploy-infrastructure]
       
       - store-app:
-          requires: [deploy-infrastructure]
+          requires: [create-bucket]
+      - deploy-infrastructure:
+        requires: [store-app]
       # - fetch-app:
       #     requires: [deploy-infrastructure , store-app ]
       # - build-app:
