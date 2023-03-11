@@ -221,8 +221,8 @@ jobs:
     steps:
       - checkout 
       
-      - attach_workspace:
-          at: ~/
+      # - attach_workspace:
+      #     at: ~/
 
       - run:
           name: Install dependencies
@@ -260,9 +260,9 @@ jobs:
               if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
               then
                 echo "------------------ Deleting old Envirments ------------------"
-                aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
-                aws s3 rm s3://uda-fp23-${OldWorkflowID} --recursive
-                aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
+                aws cloudformation delete-stack --stack-name "asg-${OldWorkflowID}"
+                aws s3 rm s3://react-gp23-${OldWorkflowID} --recursive
+                
               else
                 echo "------------------ Nothing to Delete/Can't Delete ------------------"  
               fi
@@ -287,6 +287,8 @@ workflows:
           requires: [create-bucket]
       - deploy-infrastructure:
           requires: [store-app]
+      - cleanup:
+          requires: [deploy-infrastructure]
       # - fetch-app:
       #     requires: [deploy-infrastructure , store-app ]
       # - build-app:

@@ -4,9 +4,9 @@ Description:
 Parameters:
 
 
-  # WorkflowID:
-  #     Description: An environment name that will be prefixed to resource names
-  #     Type: String
+  WorkflowID:
+      Description: An environment name that will be prefixed to resource names
+      Type: String
   
 
   # Wf:
@@ -194,12 +194,10 @@ Resources:
       ImageId: ami-0574da719dca65348
       SecurityGroupIds: 
         - Ref: JumpboxSecurityGroup
+      KeyName: nada
       SubnetId:
         Fn::ImportValue:  "Public-Subnet1"
-      Tags: 
-        - Key: Name
-          Value: !Sub ${WorkflowID}
-            
+      
      
 Outputs:
 
