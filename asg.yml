@@ -40,17 +40,17 @@ Resources:
 
           
           cd ~
-          aws s3 cp s3://react-gp23--${WorkflowID}
+          aws s3 cp s3://react-gp23--${WorkflowID}/app
           
 
           cd ~/app
           npm run build
 
           sudo mkdir /var/www/react-app
-          sudo chown -R $USER:$USER
+          sudo chown -R $USER:$USER  /var/www/react-app
 
           cd ~/app
-          cp -r build/*  /var/www/react-app
+          sudo cp -r build/*  /var/www/react-app
 
           cd /etc/nginx/sites-available
           rm -f default  
@@ -65,7 +65,6 @@ Resources:
 
 
 
-     
 
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
