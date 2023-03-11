@@ -46,12 +46,11 @@ jobs:
       - run:
           name: Create LB Stack
           command: |
-    
 
             #aws cloudformation create-stack --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}" --template-body file://service.yml   --parameters file://service.json  --tags Key=project,Value=react 
             #aws cloudformation deploy --template-file service.yml   --stack-name "service-${CIRCLE_WORKFLOW_ID:0:5}"    --tags project=react 
       
-      - run:
+      - run :
           name: Create ASG Stack
           command: |
             
@@ -59,6 +58,24 @@ jobs:
             #aws cloudformation create-stack --stack-name "network-${CIRCLE_WORKFLOW_ID:0:5}" --template-body file://service.yml   --parameters file://service.json  --tags Key=project,Value=react 
             aws cloudformation deploy --template-file asg.yml   --stack-name "asg-${CIRCLE_WORKFLOW_ID:0:5}"  --parameter-overrides  WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}"  --tags project=react 
       
+      - run:
+          name: Get old stack workflow id and Save it
+          command: |
+            export OldWorkflowID=$(aws cloudformation \
+                    list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+                    --no-paginate --output text)
+
+                  
+            echo OldWorkflowID: "${OldWorkflowID}"
+            echo Current_CIRCLE_WORKFLOW_ID: "${CIRCLE_WORKFLOW_ID:0:5}"
+            echo $OldWorkflowID > ~/OldWorkflowID.txt
+
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - OldWorkflowID.txt
+      
+      - run: cat ~/OldWorkflowID.txt
 
       - destroy-bucket
       - destroy-enviroment
@@ -244,7 +261,9 @@ jobs:
             echo OldWorkflowID: "${OldWorkflowID}"
             echo Current_CIRCLE_WORKFLOW_ID: "${CIRCLE_WORKFLOW_ID:0:5}"
             echo $OldWorkflowID > ~/OldWorkflowID.txt
-
+      
+      - attach_workspace:
+          at: ~/
                 
       - run:
           name: Remove old stacks and files
