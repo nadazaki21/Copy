@@ -118,7 +118,7 @@ jobs:
       - run:
           name: Create  S3 Bucket 
           command: |
-            aws cloudformation deploy --template-file s3bucket.yml   --stack-name "s3-${CIRCLE_WORKFLOW_ID:0:5}"  --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:5}"   --tags project=udapeople 
+            aws cloudformation deploy --template-file s3bucket.yml   --stack-name "s3bucket-${CIRCLE_WORKFLOW_ID:0:5}"  --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:5}"   --tags project=udapeople 
             #A stack to be able to apply all of the s3bucket confuguartins that are in s3bucket.yml file, I would have used the cli ttool to craete the buckeyt but it will not take configurations 
       
       - destroy-bucket
@@ -133,7 +133,7 @@ jobs:
       - run:
           name: put app files in the bucket 
           command: |
-              aws s3 sync app s3://react-gp23--${CIRCLE_WORKFLOW_ID:0:5}
+              aws s3 sync app s3://react-gp23-${CIRCLE_WORKFLOW_ID:0:5}
       
       - destroy-bucket
       - destroy-enviroment

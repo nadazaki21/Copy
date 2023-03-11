@@ -58,6 +58,7 @@ Resources:
           sudo systemctl restart nginx
 
           sudo npm install pm2@latest -g
+          cd ~/app
           pm2 start --name "react-app" 
 
 
